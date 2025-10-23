@@ -1,0 +1,242 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection
+    match /users/{userId} {
+      // Allow user creation with more flexible rules
+      allow create: if request.auth != null && 
+                   request.auth.uid == userId && 
+                   validateUserCreate();
+      
+      // Allow users to read their own profile or admins to read any
+      allow read: if request.auth != null && 
+                 (request.auth.uid == userId || isAdminUser());
+      
+      // Allow users to update their own profile with proper validation
+      // or admins to update any profile with admin validation
+      allow update: if request.auth != null && 
+                   ((request.auth.uid == userId && validateUserProfileUpdate()) || 
+                   (isAdminUser() && validateAdminUserUpdate()));
+      
+      // Only admins can delete users
+      allow delete: if request.auth != null && isAdminUser();
+      
+      // Only admins can list users
+      allow list: if request.auth != null && isAdminUser();
+    }
+
+    // Attendance collection
+match /attendance/{recordId} {
+  allow create: if request.auth != null && 
+              request.resource.data.userId == request.auth.uid &&
+              validateAttendanceCreate();
+
+  allow read: if request.auth != null && 
+            (resource.data.userId == request.auth.uid || isAdminUser());
+
+  allow update: if request.auth != null && 
+              ((resource.data.userId == request.auth.uid && validateAttendanceUpdate()) ||
+               isAdminUser());
+
+  allow delete: if false;
+  
+  // Add explicit list permission for admins
+  allow list: if request.auth != null && isAdminUser();
+}
+
+    // Leave balances
+    match /leaveBalances/{userId} {
+      allow create: if request.auth != null && 
+                   request.auth.uid == userId &&
+                   validateLeaveBalanceCreate();
+      
+      allow read: if request.auth != null && 
+                 (request.auth.uid == userId || isAdminUser());
+      
+      allow update: if request.auth != null && isAdminUser();
+      
+      // Add explicit list permission for admins
+      allow list: if request.auth != null && isAdminUser();
+    }
+
+    // Leave requests - UPDATED RULES
+    match /leaveRequests/{requestId} {
+      // Allow users to read their own leave requests
+      allow read: if request.auth != null && 
+                 (resource.data.userId == request.auth.uid || isAdminUser());
+      
+      // Allow users to create leave requests with more flexible validation
+      allow create: if request.auth != null && 
+                   request.resource.data.userId == request.auth.uid &&
+                   validateLeaveRequestCreate();
+      
+      // Allow users to update their own pending requests or admins to update any
+      allow update: if request.auth != null && 
+                   ((resource.data.userId == request.auth.uid && resource.data.status == "pending") || 
+                   isAdminUser());
+                   
+      // Add explicit list permission for users to see their own requests
+      allow list: if request.auth != null;
+    }
+
+    // Document requests collection
+    match /documentRequests/{requestId} {
+      // Allow users to read their own document requests
+      allow read: if request.auth != null && 
+                 (resource.data.userId == request.auth.uid || isAdminUser());
+      
+      // Allow users to create document requests
+      allow create: if request.auth != null && 
+                   request.resource.data.userId == request.auth.uid;
+      
+      // Allow users to update their own pending requests or admins to update any
+      allow update: if request.auth != null && 
+                   ((resource.data.userId == request.auth.uid && resource.data.status == "pending") || 
+                   isAdminUser());
+                   
+      // Add explicit list permission for users to see their own requests
+      allow list: if request.auth != null;
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && 
+                 resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null && isAdminUser();
+      
+      allow update: if request.auth != null && 
+                   resource.data.userId == request.auth.uid;
+                   
+      allow list: if request.auth != null;
+    }
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isCurrentUser(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAdminUser() {
+      // Simplified admin check - just check the token
+      return request.auth != null && 
+             (request.auth.token.role == 'admin' || request.auth.token.admin == true);
+    }
+
+    function validateUserCreate() {
+      let incoming = request.resource.data;
+      return incoming.keys().hasAny(['email', 'displayName']) &&
+             (!('email' in incoming) || incoming.email is string) &&
+             (!('displayName' in incoming) || incoming.displayName is string) &&
+             (!('role' in incoming) || incoming.role in ['user', 'admin']) &&
+             (!('status' in incoming) || incoming.status in ['pending', 'active', 'inactive']) &&
+             (!('createdAt' in incoming) || incoming.createdAt is timestamp);
+    }
+
+    function validateUserProfileUpdate() {
+  let incoming = request.resource.data;
+  let existing = resource.data;
+  
+  // These protected fields should not be changed by regular users
+  let protectedFieldsValid = 
+    (!('uid' in incoming) || incoming.uid == existing.uid) &&
+    (!('email' in incoming) || incoming.email == existing.email) &&
+    (!('role' in incoming) || incoming.role == existing.role) &&
+    (!('status' in incoming) || incoming.status == existing.status);
+  
+  // Allow all other fields to be updated with proper type validation
+  return protectedFieldsValid && 
+         (!('displayName' in incoming) || incoming.displayName is string) &&
+         (!('phoneNumber' in incoming) || incoming.phoneNumber is string) &&
+         (!('dateOfBirth' in incoming) || incoming.dateOfBirth is string) &&
+         (!('dateOfJoining' in incoming) || incoming.dateOfJoining is string) &&
+         (!('department' in incoming) || incoming.department is string) &&
+         (!('position' in incoming) || incoming.position is string) &&
+         (!('designation' in incoming) || incoming.designation is string) &&
+         (!('officeLocation' in incoming) || incoming.officeLocation is string) &&
+         (!('homeLocation' in incoming) || incoming.homeLocation is string) &&
+         (!('seatingLocation' in incoming) || incoming.seatingLocation is string) &&
+         (!('extensionNumber' in incoming) || incoming.extensionNumber is string) &&
+         (!('employeeType' in incoming) || incoming.employeeType is string) &&
+         (!('reportingManager' in incoming) || incoming.reportingManager is string) &&
+         (!('reportingManagerId' in incoming) || incoming.reportingManagerId is string) &&
+         (!('education' in incoming) || incoming.education is list) &&
+         (!('experience' in incoming) || incoming.experience is list) &&
+         (!('skills' in incoming) || incoming.skills is list) &&
+         (!('dependents' in incoming) || incoming.dependents is list) &&
+         (!('lastActive' in incoming) || incoming.lastActive is timestamp) &&
+         (!('isActive' in incoming) || incoming.isActive is bool) &&
+         (!('updatedAt' in incoming) || incoming.updatedAt is timestamp);
+}
+
+    function validateAdminUserUpdate() {
+      let incoming = request.resource.data;
+      
+      // Admins can update any field with proper type validation
+      return (!('email' in incoming) || incoming.email is string) &&
+             (!('role' in incoming) || incoming.role in ['user', 'admin']) &&
+             (!('status' in incoming) || incoming.status in ['pending', 'active', 'inactive']) &&
+             (!('updatedAt' in incoming) || incoming.updatedAt is timestamp);
+    }
+
+    function validateAttendanceCreate() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['userId', 'date', 'checkIn', 'status', 'createdAt']) &&
+             data.userId is string &&
+             data.date is timestamp &&
+             data.checkIn is string &&
+             data.status in ['Present', 'Late'] &&
+             data.createdAt is timestamp;
+    }
+
+function validateAttendanceUpdate() {
+  let data = request.resource.data;
+  let existing = resource.data;
+  
+  // More flexible validation for attendance updates
+  return data.userId == existing.userId && 
+         (
+           // Allow adding checkOut
+           (data.checkOut is string && 'updatedAt' in data) ||
+           // Allow updating status
+           ('status' in data && data.status in ['Present', 'Late', 'Checked In', 'Checked Out']) ||
+           // Allow updating activity status
+           (('isActive' in data || 'lastActive' in data) && 'updatedAt' in data) ||
+           // Allow other updates with timestamp
+           ('updatedAt' in data && data.updatedAt is timestamp)
+         );
+}
+
+
+    function validateLeaveBalanceCreate() {
+      let data = request.resource.data;
+      return data.userId == request.auth.uid &&
+             data.annual is number &&
+             data.sick is number &&
+             data.casual is number &&
+             data.createdAt is timestamp;
+    }
+
+    function validateLeaveRequestCreate() {
+      let data = request.resource.data;
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             (data.leaveType is string || data.type is string) &&
+             data.startDate is timestamp &&
+             data.endDate is timestamp &&
+             data.status == 'pending' &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
+    }
+
+    function validateLeaveRequestUpdate() {
+      let data = request.resource.data;
+      let existing = resource.data;
+      
+      return data.userId == existing.userId &&
+             data.status in ['pending', 'approved', 'rejected'];
+    }
+  }
+}
