@@ -5,10 +5,10 @@ import { auth, db } from '@/lib/firebase/admin';
 // Add this GET method to your existing route file
 export async function GET(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: Promise<{ uid: string }> }
 ) {
   try {
-    const uid = params.uid;
+    const { uid } = await params;
     
     // Verify authentication
     const authHeader = request.headers.get('Authorization');
@@ -73,10 +73,10 @@ export async function GET(
 }
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: Promise<{ uid: string }> }
 ) {
   try {
-    const uid = params.uid;
+    const { uid } = await params;
     
     // Verify authentication
     const authHeader = request.headers.get('Authorization');
@@ -126,10 +126,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: Promise<{ uid: string }> }
 ) {
   try {
-    const uid = params.uid;
+    const { uid } = await params;
     
     // Verify authentication
     const authHeader = request.headers.get('Authorization');

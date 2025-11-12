@@ -4,10 +4,10 @@ import { Timestamp } from 'firebase-admin/firestore';
 
 export async function POST(
     request: NextRequest,
-    context: { params: { userId: string } }
+    context: { params: Promise<{ userId: string }> }
 ) {
     try {
-        const userId = context.params.userId;
+        const { userId } = await context.params;
 
         // Get authorization token
         const authHeader = request.headers.get('Authorization');

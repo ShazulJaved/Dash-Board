@@ -57,7 +57,7 @@ async function verifyAuth(request: NextRequest): Promise<{ uid: string; role: Ro
 // GET /api/user/[userId]
 export async function GET(
   request: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   const params = await context.params;
   const userId = params.userId;
@@ -87,7 +87,7 @@ export async function GET(
 // PUT /api/user/[userId]
 export async function PUT(
   request: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   const params = await context.params;
   const userId = params.userId;
@@ -128,7 +128,7 @@ export async function PUT(
 // DELETE /api/user/[userId]
 export async function DELETE(
   request: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   const params = await context.params;
   const userId = params.userId;

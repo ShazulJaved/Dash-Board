@@ -4,7 +4,7 @@ import { generateCSRFToken } from '@/utils/csrf';
 
 export async function GET() {
   const csrfToken = generateCSRFToken();
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   
   // Set CSRF token in a cookie
   cookieStore.set('csrf-token', csrfToken, {

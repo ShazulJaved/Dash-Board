@@ -4,10 +4,10 @@ import { auth, db } from '@/lib/firebase/admin';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: Promise<{ uid: string }> }
 ) {
   try {
-    const uid = params.uid;
+    const { uid } = await params;
     
     // Verify authentication
     const authHeader = request.headers.get('Authorization');

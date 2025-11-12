@@ -6,13 +6,10 @@ import { Timestamp } from 'firebase-admin/firestore';
 // Change the export style to use named export with const
 export const POST = async (
     request: NextRequest,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
 ) => {
     try {
-        // Remove this line as it might be causing issues
-        // await Promise.resolve();
-        
-        const userId = params.userId;
+        const { userId } = await params;
 
         // Get authorization token
         const authHeader = request.headers.get('Authorization');

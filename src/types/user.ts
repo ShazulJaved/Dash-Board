@@ -89,3 +89,4 @@ export interface UserResponse {
 // Form data types
 export type UpdateProfileData = Pick<User, 'displayName' | 'phoneNumber' | 'photoURL'>;
 export type CreateLeaveRequestData = Omit<LeaveRequest, 'id' | 'userId' | 'status' | 'submittedAt' | 'updatedAt'>;
+export type CreateUserData = Omit<User, 'uid'>;
