@@ -16,6 +16,7 @@ import {
   BarChart,
   UserCircle,
   Loader2,
+  Megaphone,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,9 @@ import { signOut } from "firebase/auth";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { setUserOffline } from '@/lib/firebase/presence';
+import { Card } from "./ui/card";
+
+
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -42,15 +46,15 @@ export function Sidebar() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      
+
       // Set user status to inactive before signing out
       if (user) {
         await setUserOffline(user.uid);
       }
-      
+
       // Sign out from Firebase
       await signOut(auth);
-      
+
       // Clear any session cookies by calling your API
       try {
         await fetch('/api/auth/signout', {
@@ -59,16 +63,16 @@ export function Sidebar() {
       } catch (error) {
         console.error('Error clearing session:', error);
       }
-      
+
       // Show success message
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
       });
-      
+
       // Redirect to sign-in page
       router.push('/auth/sign-in');
-      
+
     } catch (error) {
       console.error('Logout error:', error);
       toast({
@@ -86,28 +90,28 @@ export function Sidebar() {
   }
 
   return (
-    <div
+   
+       <div
       suppressHydrationWarning
-      className={`flex flex-col h-screen bg-gray-800 text-white border-r border-gray-700 transition-all duration-300 ${
-        isCollapsed ? "w-20" : "w-64"
-      }`}
-    >
+      className={`flex flex-col  h-screen  border-l-4 text-white shadow-box-lg pl-4 transition-all duration-300 ${isCollapsed ? "w-20" : "w-64"
+        }`}>
+    
       {/* Header section */}
-      <div suppressHydrationWarning className="p-4 flex items-center justify-between border-b border-gray-700">
+      <div suppressHydrationWarning className="p-4 flex items-center justify-between">
         <Link
           href="/admin/dashboard"
-          className="flex items-center hover:text-blue-300 transition-colors"
+          className="flex items-center hover:text-black transition-colors"
         >
-          {!isCollapsed && <User2 className="w-8 h-8 mr-2 text-gray-300" />}
-          <h1 className={`text-xl font-bold ${isCollapsed ? "hidden" : ""}`}>
+          {!isCollapsed && <User2 className="w-8 h-8 mr-2 text-white" />}
+          <h1 className={`text-xl text-black font-bold ${isCollapsed ? "hidden" : ""}`}>
             Admin Panel
           </h1>
         </Link>
         <button
-          className="p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          className="p-2 rounded-md hover:bg-white focus:outline-none focus:ring-2 focus:ring-teal-100"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
-          <Menu className="w-6 h-6 text-gray-300" />
+          <Menu className="w-6 h-6 text-black" />
         </button>
       </div>
 
@@ -116,47 +120,58 @@ export function Sidebar() {
         <Link
           href="/admin/profile"
           className={cn(
-            "flex items-center gap-2 rounded-md px-3 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200",
-            pathname === "/admin/profile" ? "bg-gray-700" : ""
+            "flex items-center gap-2 rounded-md px-3 py-2 text-black hover:bg-purple-200 transition-colors duration-200",
+            pathname === "/admin/profile" ? "bg-purple-200" : ""
           )}
         >
-          <UserCircle className="w-4 h-4 text-gray-400" />
-          {!isCollapsed && <span className="text-sm">My Profile</span>}
+          <UserCircle className="w-4 h-4 text-black" />
+          {!isCollapsed && <span className="text-sm text-black">My Profile</span>}
         </Link>
 
         <Link
           href="/admin/employees"
           className={cn(
-            "flex items-center gap-2 rounded-md px-3 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200",
-            pathname === "/admin/employees" ? "bg-gray-700" : ""
+            "flex items-center gap-2 rounded-md px-3 py-2 text-black hover:bg-purple-200 transition-colors duration-200",
+            pathname === "/admin/employees" ? "bg-purple-200 " : ""
           )}
         >
-          <Users className="w-4 h-4 text-gray-400" />
-          {!isCollapsed && (
-            <span className="text-sm">Employees Registered</span>
-          )}
+          <Users className="w-4 h-4 text-black" />
+          {!isCollapsed && 
+            <span className="text-sm text-black">Employees Registered</span>
+          }
         </Link>
 
         <Link
           href="/admin/role-management"
           className={cn(
-            "flex items-center gap-2 rounded-md px-3 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200",
-            pathname === "/admin/role-management" ? "bg-gray-700" : ""
+            "flex items-center gap-2 rounded-md px-3 py-2 text-black hover:bg-purple-200 transition-colors duration-200",
+            pathname === "/admin/role-management" ? "bg-purple-200" : ""
           )}
         >
-          <Shield className="w-4 h-4 text-gray-400" />
-          {!isCollapsed && <span className="text-sm">Role Management</span>}
+          <Shield className="w-4 h-4 text-blak" />
+          {!isCollapsed && <span className="text-sm text-black">Role Management</span>}
         </Link>
 
         <Link
           href="/admin/reports"
           className={cn(
-            "flex items-center gap-2 rounded-md px-3 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200",
-            pathname === "/admin/reports" ? "bg-gray-700" : ""
+            "flex items-center gap-2 rounded-md px-3 py-2 text-black hover:bg-purple-200 transition-colors duration-200",
+            pathname === "/admin/reports" ? "bg-purple-200" : ""
           )}
         >
-          <BarChart className="w-4 h-4 text-gray-400" />
+          <BarChart className="w-4 h-4 text-black" />
           {!isCollapsed && <span className="text-sm">Attendance Reports</span>}
+        </Link>
+
+        <Link
+          href="/admin/announcements"
+          className={cn(
+            "flex items-center gap-2 rounded-md px-3 py-2 text-black hover:bg-purple-200 transition-colors duration-200",
+            pathname === "/admin/announcements" ? "bg-purple-200" : ""
+          )}
+        >
+          <Megaphone className="w-4 h-4 text-black" />
+          {!isCollapsed && <span className="text-sm">Announcements</span>}
         </Link>
 
         {/* Logout section */}
@@ -164,15 +179,15 @@ export function Sidebar() {
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="w-full p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center gap-2"
+            className="w-full p-2 rounded-md hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center gap-2"
           >
             {isLoggingOut ? (
-              <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+              <Loader2 className="w-4 h-4 text-black animate-spin" />
             ) : (
-              <LogOut className="w-4 h-4 text-gray-400" />
+              <LogOut className="w-4 h-4 text-black" />
             )}
             {!isCollapsed && (
-              <span className="text-sm">
+              <span className="text-sm text-black">
                 {isLoggingOut ? "Logging out..." : "Logout"}
               </span>
             )}
@@ -180,5 +195,7 @@ export function Sidebar() {
         </div>
       </nav>
     </div>
+    
+   
   );
 }

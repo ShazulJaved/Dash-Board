@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "@/lib/firebase/firebase";
-import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore"; // Added setDoc import
+import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import {
   Loader2,
   Camera,
@@ -36,6 +35,7 @@ import {
   X,
 } from "lucide-react";
 import { format } from "date-fns";
+//import SimpleFloatingDots from "@/components/SimpleFloatingDots";
 
 interface ProfileData {
   displayName: string;
@@ -46,7 +46,8 @@ interface ProfileData {
   bio: string;
   joinDate: string;
   photoURL: string;
-}
+};
+
 
 export default function AdminProfilePage() {
   const [user, authLoading] = useAuthState(auth);
@@ -71,7 +72,7 @@ export default function AdminProfilePage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!user && !authLoading) {
+    if (!authLoading && !user) {
       router.push("/auth/sign-in");
     }
   }, [user, authLoading, router]);
@@ -88,11 +89,9 @@ export default function AdminProfilePage() {
 
         if (userDoc.exists()) {
           const userData = userDoc.data();
-
-          // Always use the email from Firebase Auth as it's guaranteed to exist
           setProfile({
             displayName: userData.displayName || user.displayName || "",
-            email: user.email || "", // Prioritize the email from Firebase Auth
+            email: user.email || "",
             phoneNumber: userData.phoneNumber || "",
             department: userData.department || "",
             position: userData.position || "",
@@ -103,7 +102,6 @@ export default function AdminProfilePage() {
             photoURL: userData.photoURL || user.photoURL || "",
           });
         } else {
-          // If no user document exists, create one with the auth data
           const newUserData = {
             displayName: user.displayName || "",
             email: user.email || "",
@@ -118,9 +116,7 @@ export default function AdminProfilePage() {
             updatedAt: new Date(),
           };
 
-          // Create the user document
           await setDoc(userDocRef, newUserData);
-
           setProfile(newUserData);
         }
       } catch (error) {
@@ -135,7 +131,9 @@ export default function AdminProfilePage() {
       }
     };
 
-    fetchUserProfile();
+    if (user) {
+      fetchUserProfile();
+    }
   }, [user, toast]);
 
   const handleInputChange = (
@@ -153,30 +151,35 @@ export default function AdminProfilePage() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid File",
+        description: "Please select an image file",
+      });
+      return;
+    }
+
     try {
       setIsUploading(true);
       setUploadProgress(0);
 
-      // Check if storage is available
       if (typeof storage === "undefined") {
-        // Fallback to a placeholder image or show an error
         toast({
           variant: "destructive",
           title: "Storage Not Available",
-          description:
-            "Firebase Storage is not configured. Please contact your administrator.",
+          description: "Firebase Storage is not configured.",
         });
         setIsUploading(false);
         return;
       }
 
-      // Create a storage reference
       const storageRef = ref(
         storage,
         `profile-photos/${user.uid}/${Date.now()}-${file.name}`
       );
 
-      // Upload file with progress monitoring
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on(
@@ -196,25 +199,22 @@ export default function AdminProfilePage() {
           setIsUploading(false);
         },
         async () => {
-          // Upload completed successfully
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-
-          // Update profile state
           setProfile((prev) => ({ ...prev, photoURL: downloadURL }));
-
-          // Update auth profile
           await updateProfile(user, { photoURL: downloadURL });
 
-          // Update Firestore document
           const userDocRef = doc(db, "users", user.uid);
-          await updateDoc(userDocRef, { photoURL: downloadURL });
+          await updateDoc(userDocRef, { 
+            photoURL: downloadURL,
+            updatedAt: new Date()
+          });
 
           toast({
             title: "Photo Updated",
             description: "Your profile photo has been updated successfully",
           });
-
           setIsUploading(false);
+          setUploadProgress(0);
         }
       );
     } catch (error) {
@@ -233,8 +233,6 @@ export default function AdminProfilePage() {
 
     try {
       setSaving(true);
-
-      // Update Firestore document
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
         displayName: profile.displayName,
@@ -246,7 +244,6 @@ export default function AdminProfilePage() {
         updatedAt: new Date(),
       });
 
-      // Update auth profile
       await updateProfile(user, {
         displayName: profile.displayName,
       });
@@ -269,214 +266,273 @@ export default function AdminProfilePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-slate-600">Loading your profile...</p>
+        </div>
       </div>
     );
   }
 
   if (!user) {
-    return null; // Will redirect in useEffect
+    return null; // Redirect will happen in useEffect
   }
 
   return (
-    <div className="container mx-auto py-10 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Admin Profile</h1>
+    <div className="min-h-screen relative bg-gray-200 "
+    style={{  background: "#FFF7DD"}}>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Profile Photo Card */}
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Profile Photo</CardTitle>
-            <CardDescription>Update your profile picture</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            <div className="relative mb-4">
-              <Avatar className="h-32 w-32">
-                <AvatarImage src={profile.photoURL} alt={profile.displayName} />
-                <AvatarFallback className="text-2xl">
-                  {profile.displayName?.charAt(0) || user.email?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <button 
-                className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors"
-                onClick={handlePhotoClick}
-                disabled={isUploading}
-              >
-                <Camera className="h-4 w-4" />
-              </button>
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-            </div>
-            
-            {isUploading && (
-              <div className="w-full">
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-600 transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
+      
+      {/* Main Content */}
+      <div className="container mx-auto py-8 px-4 max-w-6xl relative z-10 bg-gray-200 ">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-slate-600 mb-3">
+            Admin Profile
+          </h1>
+          <p className="text-slate-600 text-lg">Manage your account information and preferences</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6"
+        style={{background:"#3B0270"}}>
+          {/* Profile Photo Card */}
+          <div className="lg:col-span-1">
+            <Card className=" backdrop-blur-xl border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 bg-purple-300">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-slate-800">Profile Photo</CardTitle>
+                <CardDescription>Update your profile picture</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center">
+                <div className="relative mb-6 group">
+                  <Avatar className="h-40 w-40 border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300">
+                    <AvatarImage 
+                      src={profile.photoURL} 
+                      alt={profile.displayName} 
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-3xl text-black">
+                      {profile.displayName?.charAt(0) || user.email?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <button 
+                    className="absolute bottom-2 right-2 text-black bg-purple-400 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 disabled:opacity-50"
+                    onClick={handlePhotoClick}
+                    disabled={isUploading}
+                  >
+                    <Camera className="h-5 w-5" />
+                  </button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
                 </div>
-                <p className="text-sm text-center mt-1">Uploading: {Math.round(uploadProgress)}%</p>
-              </div>
-            )}
-            
-            <div className="text-center mt-4">
-              <h3 className="font-medium text-lg">{profile.displayName || 'Admin User'}</h3>
-              <p className="text-gray-500">{profile.email}</p>
-              <p className="text-gray-500">{profile.position}</p>
-              <p className="text-gray-500">{profile.department}</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Profile Details Card */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>Update your account details</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="personal">
-              <TabsList className="mb-4">
-                <TabsTrigger value="personal">Personal Info</TabsTrigger>
-                <TabsTrigger value="work">Work Details</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="personal" className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="displayName" className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      Full Name
-                    </Label>
-                    <Input
-                      id="displayName"
-                      name="displayName"
-                      value={profile.displayName}
-                      onChange={handleInputChange}
-                      placeholder="Your full name"
-                    />
+                
+                {isUploading && (
+                  <div className="w-full mb-4">
+                    <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full text-slate-300 transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-sm text-center mt-2 text-slate-600">
+                      Uploading: {Math.round(uploadProgress)}%
+                    </p>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      value={profile.email || user?.email || ''}
-                      disabled
-                      className="bg-gray-50"
-                    />
-                    <p className="text-xs text-gray-500">Email cannot be changed</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="phoneNumber" className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      Phone Number
-                    </Label>
-                    <Input
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      value={profile.phoneNumber}
-                      onChange={handleInputChange}
-                      placeholder="Your phone number"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="bio" className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      Bio
-                    </Label>
-                    <Textarea
-                      id="bio"
-                      name="bio"
-                      value={profile.bio}
-                      onChange={handleInputChange}
-                      placeholder="A brief description about yourself"
-                      rows={4}
-                    />
-                  </div>
+                )}
+                
+                <div className="text-center space-y-2">
+                  <h3 className="font-semibold text-xl text-slate-800">
+                    {profile.displayName || 'Admin User'}
+                  </h3>
+                  <p className="text-slate-600">{profile.email}</p>
+                  {profile.position && (
+                    <p className="text-slate-600 font-medium">{profile.position}</p>
+                  )}
+                  {profile.department && (
+                    <p className="text-slate-600">{profile.department}</p>
+                  )}
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="work" className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="department" className="flex items-center gap-2">
-                      <Building className="h-4 w-4" />
-                      Department
-                    </Label>
-                    <Input
-                      id="department"
-                      name="department"
-                      value={profile.department}
-                      onChange={handleInputChange}
-                      placeholder="Your department"
-                    />
-                  </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Profile Details Card */}
+          <div className="lg:col-span-3">
+            <Card className=" backdrop-blur-xl border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 bg-purple-300">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-slate-800 text-2xl">Profile Information</CardTitle>
+                <CardDescription>Update your personal and work details</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="personal" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-100/50 p-1 rounded-lg">
+                    <TabsTrigger 
+                      value="personal" 
+                      className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Personal Info
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="work"
+                      className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
+                    >
+                      <Briefcase className="h-4 w-4 mr-2" />
+                      Work Details
+                    </TabsTrigger>
+                  </TabsList>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="position" className="flex items-center gap-2">
-                      <Briefcase className="h-4 w-4" />
-                      Position
-                    </Label>
-                    <Input
-                      id="position"
-                      name="position"
-                      value={profile.position}
-                      onChange={handleInputChange}
-                      placeholder="Your job position"
-                    />
-                  </div>
+                  <TabsContent value="personal" className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="displayName" className="flex items-center gap-2 text-slate-700 font-medium">
+                          <User className="h-4 w-4 text-blue-500" />
+                          Full Name
+                        </Label>
+                        <Input
+                          id="displayName"
+                          name="displayName"
+                          value={profile.displayName}
+                          onChange={handleInputChange}
+                          placeholder="Your full name"
+                          className="bg-white/50 border-slate-200 focus:border-blue-500 transition-colors duration-200"
+                        />
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <Label htmlFor="email" className="flex items-center gap-2 text-slate-700 font-medium">
+                          <Mail className="h-4 w-4 text-green-500" />
+                          Email
+                        </Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          value={profile.email || user?.email || ''}
+                          disabled
+                          className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        />
+                        <p className="text-xs text-slate-400">Email cannot be changed</p>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <Label htmlFor="phoneNumber" className="flex items-center gap-2 text-slate-700 font-medium">
+                          <Phone className="h-4 w-4 text-purple-500" />
+                          Phone Number
+                        </Label>
+                        <Input
+                          id="phoneNumber"
+                          name="phoneNumber"
+                          value={profile.phoneNumber}
+                          onChange={handleInputChange}
+                          placeholder="Your phone number"
+                          className="bg-white/50 border-slate-200 focus:border-purple-500 transition-colors duration-200"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <Label htmlFor="bio" className="flex items-center gap-2 text-slate-700 font-medium">
+                        <User className="h-4 w-4 text-cyan-500" />
+                        Bio
+                      </Label>
+                      <Textarea
+                        id="bio"
+                        name="bio"
+                        value={profile.bio}
+                        onChange={handleInputChange}
+                        placeholder="A brief description about yourself..."
+                        rows={4}
+                        className="bg-white/50 border-slate-200 focus:border-cyan-500 transition-colors duration-200 resize-none"
+                      />
+                    </div>
+                  </TabsContent>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="joinDate" className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Join Date
-                    </Label>
-                    <Input
-                      id="joinDate"
-                      name="joinDate"
-                      type="date"
-                      value={profile.joinDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={() => router.back()}>
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-            <Button onClick={handleSaveProfile} disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
+                  <TabsContent value="work" className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="department" className="flex items-center gap-2 text-slate-700 font-medium">
+                          <Building className="h-4 w-4 text-orange-500" />
+                          Department
+                        </Label>
+                        <Input
+                          id="department"
+                          name="department"
+                          value={profile.department}
+                          onChange={handleInputChange}
+                          placeholder="Your department"
+                          className="bg-white/50 border-slate-200 focus:border-orange-500 transition-colors duration-200"
+                        />
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <Label htmlFor="position" className="flex items-center gap-2 text-slate-700 font-medium">
+                          <Briefcase className="h-4 w-4 text-indigo-500" />
+                          Position
+                        </Label>
+                        <Input
+                          id="position"
+                          name="position"
+                          value={profile.position}
+                          onChange={handleInputChange}
+                          placeholder="Your job position"
+                          className="bg-white/50 border-slate-200 focus:border-indigo-500 transition-colors duration-200"
+                        />
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <Label htmlFor="joinDate" className="flex items-center gap-2 text-slate-700 font-medium">
+                          <Calendar className="h-4 w-4 text-pink-500" />
+                          Join Date
+                        </Label>
+                        <Input
+                          id="joinDate"
+                          name="joinDate"
+                          type="date"
+                          value={profile.joinDate}
+                          onChange={handleInputChange}
+                          className="bg-white/50 border-slate-200 focus:border-pink-500 transition-colors duration-200"
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+              <CardFooter className="flex justify-between border-t border-slate-200/50 pt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={() => router.back()}
+                  className="border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors duration-200"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSaveProfile} 
+                  disabled={saving}
+                  className="bg-gradient-to-r from-blue-300 to-purple-300 hover:from-blue-400 hover:to-purple-400 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving Changes...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

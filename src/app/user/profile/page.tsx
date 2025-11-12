@@ -257,50 +257,76 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Profile Details</h1>
-        <Button 
-          onClick={() => router.push('/user/profile/edit')}
-          variant="outline"
-          size="sm"
-        >
-          <Pencil className="h-4 w-4 mr-2" />
-          Edit Profile
-        </Button>
-      </div>
+    <div className="min-h-screen p-6 relative">
+      {/* Dark overlay for top section */}
+      <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-teal-900/60 to-emerald-800/40 pointer-events-none" />
       
-      <Card className="mb-8">
-        <CardHeader className="pb-4">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={userDetails.photoURL} alt={userDetails.displayName} />
-              <AvatarFallback>{userDetails.displayName?.[0]}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-2xl">{userDetails.displayName}</CardTitle>
-              <CardDescription className="text-base">{userDetails.designation || userDetails.role}</CardDescription>
-              <p className="text-sm text-gray-500 mt-1">{userDetails.email}</p>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="grid grid-cols-5 mb-6">
-          <TabsTrigger value="basic">Basic Info</TabsTrigger>
-          <TabsTrigger value="location">Location</TabsTrigger>
-          <TabsTrigger value="employment">Employment</TabsTrigger>
-          <TabsTrigger value="education">Education</TabsTrigger>
-          <TabsTrigger value="additional">Additional</TabsTrigger>
-        </TabsList>
+      <div className="max-w-4xl mx-auto relative z-10">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-white drop-shadow-lg">Profile Details</h1>
+          <Button 
+            onClick={() => router.push('/user/profile/edit')}
+            className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 transition-all duration-300"
+            size="sm"
+          >
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit Profile
+          </Button>
+        </div>
         
-        <TabsContent value="basic">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">Basic Information</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <Card className="mb-8 bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
+          <CardHeader className="pb-4">
+            <div className="flex items-center space-x-6">
+              <Avatar className="h-24 w-24 ring-4 ring-white/50 shadow-lg">
+                <AvatarImage src={userDetails.photoURL} alt={userDetails.displayName} />
+                <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-teal-500 to-cyan-600 text-white">
+                  {userDetails.displayName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+                  {userDetails.displayName}
+                </CardTitle>
+                <CardDescription className="text-lg text-gray-600 font-medium">
+                  {userDetails.designation || userDetails.role}
+                </CardDescription>
+                <p className="text-sm text-gray-500 mt-2 flex items-center">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                  {userDetails.email}
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+          <TabsList className="grid grid-cols-5 mb-6 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-lg">
+            <TabsTrigger value="basic" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all duration-300">
+              Basic Info
+            </TabsTrigger>
+            <TabsTrigger value="location" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all duration-300">
+              Location
+            </TabsTrigger>
+            <TabsTrigger value="employment" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all duration-300">
+              Employment
+            </TabsTrigger>
+            <TabsTrigger value="education" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all duration-300">
+              Education
+            </TabsTrigger>
+            <TabsTrigger value="additional" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all duration-300">
+              Additional
+            </TabsTrigger>
+          </TabsList>
+        
+          <TabsContent value="basic">
+            <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent flex items-center">
+                  <UserCircle className="h-6 w-6 mr-2 text-teal-600" />
+                  Basic Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
               <ul className="space-y-4">
                 {basicFields.map((field) => (
                   <li 
@@ -323,12 +349,12 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="location">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">Location Information</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <TabsContent value="location">
+            <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">Location Information</CardTitle>
+              </CardHeader>
+              <CardContent>
               <ul className="space-y-4">
                 {locationFields.map((field) => (
                   <li 
@@ -351,12 +377,15 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="employment">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">Employment Details</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <TabsContent value="employment">
+            <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent flex items-center">
+                  <Briefcase className="h-6 w-6 mr-2 text-teal-600" />
+                  Employment Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
               <ul className="space-y-4">
                 {employmentFields.map((field) => (
                   <li 
@@ -379,15 +408,15 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="education">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <GraduationCap className="h-5 w-5 mr-2" />
-                Educational Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <TabsContent value="education">
+            <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent flex items-center">
+                  <GraduationCap className="h-6 w-6 mr-2 text-teal-600" />
+                  Educational Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
               {userDetails.education && userDetails.education.length > 0 ? (
                 <Table>
                   <TableHeader>
@@ -418,14 +447,14 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
           
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Briefcase className="h-5 w-5 mr-2" />
-                Work Experience
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+            <Card className="mt-6 bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent flex items-center">
+                  <Briefcase className="h-6 w-6 mr-2 text-teal-600" />
+                  Work Experience
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
               {userDetails.experience && userDetails.experience.length > 0 ? (
                 <Table>
                   <TableHeader>
@@ -456,15 +485,15 @@ export default function ProfilePage() {
         </TabsContent>
         
         <TabsContent value="additional">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Code className="h-5 w-5 mr-2" />
-                  Skills
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-xl bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent flex items-center">
+                    <Code className="h-5 w-5 mr-2 text-teal-600" />
+                    Skills
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                 {userDetails.skills && userDetails.skills.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {userDetails.skills.map((skill, index) => (
@@ -478,15 +507,15 @@ export default function ProfilePage() {
                 )}
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
-                  Dependent Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+              
+              <Card className="bg-white/90 backdrop-blur-sm border-white/20 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-xl bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent flex items-center">
+                    <Users className="h-5 w-5 mr-2 text-teal-600" />
+                    Dependent Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                 {userDetails.dependents && userDetails.dependents.length > 0 ? (
                   <Table>
                     <TableHeader>
@@ -513,9 +542,10 @@ export default function ProfilePage() {
                 )}
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

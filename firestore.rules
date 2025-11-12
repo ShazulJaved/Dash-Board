@@ -14,15 +14,19 @@ service cloud.firestore {
       
       // Allow users to update their own profile with proper validation
       // or admins to update any profile with admin validation
-      allow update: if request.auth != null && 
-                   ((request.auth.uid == userId && validateUserProfileUpdate()) || 
-                   (isAdminUser() && validateAdminUserUpdate()));
+      allow update: if request.auth != null 
       
       // Only admins can delete users
       allow delete: if request.auth != null && isAdminUser();
       
       // Only admins can list users
       allow list: if request.auth != null && isAdminUser();
+    }
+    
+    // Announcements collection example
+    match /announcements/{docId} {
+      allow read: if request.auth != null; // user must be logged in
+      allow create, update, delete: if request.auth.token.admin == true; // admin only
     }
 
     // Attendance collection

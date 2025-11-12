@@ -522,9 +522,9 @@ const formatFirestoreTimestamp = (timestamp: any): string => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className=" top-0 h-[30%] bg-gradient-to-b from-teal-900/60 to-emerald-800/40">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Leave Management</h1>
+        <h1 className="text-3xl font-bold text-white bg-clip-text">Leave Management</h1>
         <div className="flex space-x-2">
           <Button
             variant="outline"
@@ -549,13 +549,13 @@ const formatFirestoreTimestamp = (timestamp: any): string => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Leave Balance Card */}
-        <Card className="border-purple-100">
+        <Card className="border-purple-100 bg-purple-900">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Leave Balance</CardTitle>
-            <Calendar className="h-4 w-4 text-purple-500" />
+            <CardTitle className="text-sm  text-white font-medium">Leave Balance</CardTitle>
+            <Calendar className="h-4 w-4 text-white" />
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-4 text-white">
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Sick Leave</span>
@@ -588,12 +588,13 @@ const formatFirestoreTimestamp = (timestamp: any): string => {
         </Card>
 
         {/* Reporting Manager Card */}
-        <Card className="border-blue-100">
+        <Card className="border-blue-100"
+        style={{background:"#3338A0"}}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm text-white font-medium">
               Reporting Manager
             </CardTitle>
-            <User className="h-4 w-4 text-blue-500" />
+            <User className="h-4 w-4 text-white" />
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -604,13 +605,13 @@ const formatFirestoreTimestamp = (timestamp: any): string => {
             ) : userProfile?.reportingManager ? (
               <div className="space-y-1">
                 <p className="font-medium">{userProfile.reportingManager}</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-white">
                   Your leave requests will be sent to your reporting manager for
                   approval.
                 </p>
               </div>
             ) : (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-white">
                 No reporting manager assigned. Please contact HR.
               </div>
             )}
@@ -618,28 +619,29 @@ const formatFirestoreTimestamp = (timestamp: any): string => {
         </Card>
 
         {/* Request Status Card */}
-        <Card className="border-green-100">
+        <Card className="border-green-100"
+        style={{background:"#5C3E94"}}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-white">
               Request Status
             </CardTitle>
-            <AlertCircle className="h-4 w-4 text-green-500" />
+            <AlertCircle className="h-4 w-4 text-white" />
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-3 text-white">
               <div className="flex justify-between text-sm">
                 <span>Pending Leaves</span>
                 <span className="font-medium">
                   {leaveRequests.filter((r) => r.status === "pending").length}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm text-white">
                 <span>Approved Leaves</span>
                 <span className="font-medium">
                   {leaveRequests.filter((r) => r.status === "approved").length}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm text-white">
                 <span>Pending Documents</span>
                 <span className="font-medium">
                   {
@@ -655,7 +657,7 @@ const formatFirestoreTimestamp = (timestamp: any): string => {
 
       {/* Tabs for Leave and Document Requests */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 text-teal-500">
           <TabsTrigger value="leave-requests">Leave Requests</TabsTrigger>
           <TabsTrigger value="document-requests">Document Requests</TabsTrigger>
         </TabsList>
@@ -663,7 +665,7 @@ const formatFirestoreTimestamp = (timestamp: any): string => {
         <TabsContent value="leave-requests" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Leave History</CardTitle>
+              <CardTitle className=" text-teal-800 bg-clip-text">Leave History</CardTitle>
               <CardDescription>
                 View all your leave requests and their status
               </CardDescription>

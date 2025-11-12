@@ -26,6 +26,7 @@ export default function AdminDashboard() {
             
             {/* Main Content */}
             <div className="flex-1 p-6">
+                
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>

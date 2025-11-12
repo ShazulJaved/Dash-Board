@@ -19,10 +19,12 @@ import {
   AlertCircle,
   Loader2,
   NotepadText,
+  Bell ,
   
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { setUserOffline } from "@/lib/firebase/presence";
+
 
 // Define interfaces for type safety
 interface UserData {
@@ -80,6 +82,11 @@ export function UserSidebar() {
       href: "/user/NotesPage",
       label: "Notes",
       icon: NotepadText,
+    },
+    {
+      href: "/user/announcements",
+      label: "Notifications",
+      icon: Bell  ,
     },
   ];
 
@@ -204,12 +211,13 @@ export function UserSidebar() {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-gray-800 text-white border-r border-gray-700 transition-all duration-300",
+        "flex flex-col h-screen text-black  transition-all duration-300",
         isCollapsed ? "w-20" : "w-64"
       )}
+      style={{ background: "white" }}
     >
       {/* Header section */}
-      <div className="p-4 flex items-center justify-between border-b border-gray-700">
+      <div className="p-4 flex items-center justify-between ">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={userData?.photoURL} alt={userName} />
@@ -233,7 +241,7 @@ export function UserSidebar() {
           onClick={() => setIsCollapsed(!isCollapsed)}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <Menu className="w-6 h-6 text-gray-300" />
+          <Menu className="w-6 h-6 text-black" />
         </button>
       </div>
 
@@ -244,11 +252,11 @@ export function UserSidebar() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center gap-2 rounded-md px-3 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200",
-              pathname === item.href && "bg-gray-700 text-white"
+              "flex items-center gap-2 rounded-md px-3 py-2 text-blue-900 hover:bg-gray-400 transition-colors duration-200",
+              pathname === item.href && "bg-white text-blue"
             )}
           >
-            <item.icon className="w-4 h-4 text-gray-400" />
+            <item.icon className="w-4 h-4 text-blue-900" />
             {!isCollapsed && <span className="text-sm">{item.label}</span>}
           </Link>
         ))}
@@ -258,12 +266,12 @@ export function UserSidebar() {
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="w-full p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center gap-2"
+            className="w-full p-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center gap-2"
           >
             {isLoggingOut ? (
-              <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+              <Loader2 className="w-4 h-4 text-blue-900 animate-spin" />
             ) : (
-              <LogOut className="w-4 h-4 text-gray-400" />
+              <LogOut className="w-4 h-4 text-blue-900" />
             )}
             {!isCollapsed && (
               <span className="text-sm">

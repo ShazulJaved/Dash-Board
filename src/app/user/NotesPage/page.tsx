@@ -1,8 +1,14 @@
+'use client';
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { TiPin } from "react-icons/ti";
+import { RiEdit2Fill } from "react-icons/ri";
+import { MdDelete } from "react-icons/md";
+
 
 // Types for your note
 type Note = {
@@ -40,7 +46,7 @@ function NoteInput({ onAdd }: { onAdd: (note: Omit<Note, "id" | "createdAt">) =>
   return (
     <div className="flex flex-col gap-2 mt-2">
       <textarea
-        className="border rounded px-3 py-2 w-full resize-none"
+        className="border rounded px-3 py-2 mt-50 w-full resize-none"
         value={text}
         onChange={e => setText(e.target.value)}
         placeholder="Write your note..."
@@ -49,7 +55,7 @@ function NoteInput({ onAdd }: { onAdd: (note: Omit<Note, "id" | "createdAt">) =>
       />
       <div className="flex items-center gap-2">
         <div>
-          <span className="text-xs mr-2">Color:</span>
+          <span className="text-xs mr-2 text-white">Color:</span>
           <select className="rounded" value={color} onChange={e => setColor(e.target.value)}>
             {COLORS.map(c => (
               <option key={c} value={c}>{c.replace("bg-","").replace("-100","")}</option>
@@ -100,11 +106,11 @@ function NoteList({
             <div className="flex items-center justify-between">
               <div className="flex gap-2 items-center">
                 <button
-                  className={`text-xl ${note.pinned ? "text-yellow-500" : "text-gray-400"} hover:text-yellow-500`}
+                  className={`text-xl ${note.pinned ? "text-red-500" : "text-gray-400"} hover:text-yellow-500`}
                   title={note.pinned ? "Unpin note" : "Pin note"}
                   onClick={() => onPin(note.id)}
                 >
-                  📌
+                  <TiPin size="25px" />
                 </button>
                 <span className="text-xs text-gray-500">{new Date(note.createdAt).toLocaleString()}</span>
               </div>
@@ -117,18 +123,18 @@ function NoteList({
                   {note.completed ? "↩️" : "✔️"}
                 </button>
                 <button
-                  className="text-blue-500 hover:text-blue-600"
+                  className="text-blue-500 hover:text-blue-600 size-5"
                   onClick={() => setEditing({ ...editing, [note.id]: note.text })}
                   title="Edit"
                 >
-                  ✏️
+                  <RiEdit2Fill size="25px" />
                 </button>
                 <button
                   className="text-red-500 hover:text-red-700"
                   onClick={() => onDelete(note.id)}
                   title="Delete"
                 >
-                  🗑️
+                  <MdDelete size="25px" />
                 </button>
               </div>
             </div>
@@ -151,7 +157,7 @@ function NoteList({
                   title="Save"
                 >💾</button>
                 <button
-                  className="bg-gray-200 px-2 rounded hover:bg-gray-300"
+                  className="bg-gray-200 px-2 rounded hover:bg-gray-100"
                   onClick={() => setEditing(edit => {
                     const copy = { ...edit }; delete copy[note.id]; return copy;
                   })}
@@ -216,8 +222,10 @@ export default function NotesSection() {
     ));
 
   return (
-    <div className="bg-gray-50 p-6 rounded-xl shadow max-w-lg mx-auto mt-8">
-      <h2 className="text-2xl font-semibold mb-2">Notes & Tasks</h2>
+    <div className="">
+    <div className="bg-gray-50 p-6 rounded-xl shadow max-w-lg mx-auto mt-8"
+    style={{ background: "#5C3E94" }}>
+      <h2 className="text-2xl font-semibold mb-2 text-white  bg-clip-text">Notes & Tasks</h2>
       <NoteInput onAdd={addNote} />
       <NoteList
         notes={sortedNotes}
@@ -227,8 +235,9 @@ export default function NotesSection() {
         onEdit={editNote}
       />
       {notes.length === 0 && (
-        <p className="mt-6 text-gray-400 text-center">No notes yet. Add one above!</p>
+        <p className="mt-6 text-white text-center">No notes yet. Add one above!</p>
       )}
+    </div>
     </div>
   );
 }

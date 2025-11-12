@@ -11,7 +11,8 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { useRouter } from 'next/navigation';
 import { 
   Loader2, Pencil, Search, Shield, ShieldAlert, UserCog, 
-  Users, RefreshCw, Filter, ChevronDown, CheckCircle2
+  Users, RefreshCw, Filter, ChevronDown, CheckCircle2,
+  Crown, UserCheck, Settings, Mail, Phone, MapPin, Calendar
 } from 'lucide-react';
 import {
   Dialog,
@@ -30,6 +31,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
+import React from "react";
+
 
 interface User {
   uid: string;
@@ -43,6 +46,8 @@ interface User {
   status?: string;
   createdAt?: any;
 }
+
+
 
 export default function RoleManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -233,268 +238,343 @@ export default function RoleManagement() {
     fetchUsers().finally(() => setRefreshing(false));
   };
 
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
   if (loading || authLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-indigo-50/10 to-purple-50/5">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-indigo-600" />
+          <p className="text-slate-600">Loading user management...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      <Card className="shadow-sm">
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                <UserCog className="h-6 w-6 text-primary" />
-                User Role Management
-              </CardTitle>
-              <CardDescription>
-                Manage user roles and permissions for your organization
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={refreshData}
-                disabled={refreshing}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              <div className="text-xs text-muted-foreground">
-                Last updated: {format(lastUpdated, 'h:mm:ss a')}
+    <div className="min-h-screen relative bg-transparent">
+      
+      {/* Main Content */}
+      <div className="space-y-6 p-6 max-w-7xl mx-auto relative z-10">
+        {/* Enhanced Header Card */}
+        <Card className="bg-white/90 backdrop-blur-xl border-white/30 shadow-2xl"
+        style={{  background: "AE75DA"}}>
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-3xl font-bold text-black bg-clip-text flex items-center gap-3">
+                  <Crown className="h-8 w-8" />
+                  User Role Management
+                </CardTitle>
+                <CardDescription className="text-slate-600 text-lg mt-2">
+                  Manage user roles, permissions, and access levels
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refreshData}
+                  disabled={refreshing}
+                  className="bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:border-slate-300 shadow-sm"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+                <div className="text-sm text-slate-500 bg-white/50 px-3 py-1 rounded-full border border-slate-200">
+                  Updated: {format(lastUpdated, 'h:mm:ss a')}
+                </div>
               </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4">
-              <p className="font-medium">Error loading users</p>
-              <p className="text-sm">{error}</p>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {error && (
+              <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl p-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <ShieldAlert className="h-5 w-5 text-red-600" />
+                  <div>
+                    <p className="font-semibold text-red-800">Error loading users</p>
+                    <p className="text-sm text-red-600 mt-1">{error}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={refreshData} 
+                  className="mt-3 border-red-200 text-red-700 hover:bg-red-50"
+                >
+                  Try Again
+                </Button>
+              </div>
+            )}
+
+            {/* Enhanced Filters */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6 bg-gradient-to-r from-slate-50/80 to-indigo-50/50 backdrop-blur-sm rounded-2xl p-6 border border-white/50">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
+                <Input
+                  placeholder="Search users by name, email, department..."
+                  className="pl-10 h-11 bg-white/80 border-slate-200 focus:border-indigo-300"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full md:w-auto h-11 bg-white/80 border-slate-200 hover:bg-white hover:border-slate-300">
+                    <Filter className="h-4 w-4 mr-2" />
+                    {roleFilter === "all" 
+                      ? "All Roles" 
+                      : roleFilter === "admin" 
+                        ? "Admins Only" 
+                        : "Users Only"}
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white/95 backdrop-blur-sm border border-slate-200">
+                  <DropdownMenuItem onClick={() => setRoleFilter("all")} className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    <span>All Roles</span>
+                    {roleFilter === "all" && <CheckCircle2 className="h-4 w-4 ml-auto text-green-500" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRoleFilter("admin")} className="flex items-center gap-2">
+                    <Crown className="h-4 w-4 text-purple-500" />
+                    <span>Admins Only</span>
+                    {roleFilter === "admin" && <CheckCircle2 className="h-4 w-4 ml-auto text-green-500" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRoleFilter("user")} className="flex items-center gap-2">
+                    <UserCheck className="h-4 w-4 text-blue-500" />
+                    <span>Users Only</span>
+                    {roleFilter === "user" && <CheckCircle2 className="h-4 w-4 ml-auto text-green-500" />}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Enhanced Table */}
+            <Card className="bg-white/90 backdrop-blur-xl border-white/30 shadow-xl">
+              <CardContent className="p-0">
+                <div className="rounded-2xl overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-gradient-to-r from-slate-50 to-indigo-50/80 border-b border-slate-200">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="w-[300px] text-slate-700 font-bold text-base py-5">User Profile</TableHead>
+                        <TableHead className="hidden lg:table-cell text-slate-700 font-bold text-base py-5">Department</TableHead>
+                        <TableHead className="hidden md:table-cell text-slate-700 font-bold text-base py-5">Position</TableHead>
+                        <TableHead className="text-slate-700 font-bold text-base py-5">Role Level</TableHead>
+                        <TableHead className="text-right text-slate-700 font-bold text-base py-5">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.length > 0 ? (
+                        filteredUsers.map((user) => (
+                          <TableRow key={user.uid} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors duration-150 group">
+                            <TableCell className="py-4">
+                              <div className="flex items-center gap-4">
+                                <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+                                  <AvatarImage src={user.photoURL || ''} alt={user.displayName} />
+                                  <AvatarFallback className={`text-sm font-semibold ${
+                                    user.role === 'admin' 
+                                      ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white' 
+                                      : 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white'
+                                  }`}>
+                                    {getInitials(user.displayName || 'U')}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-semibold text-slate-800 text-base">{user.displayName || 'Unnamed User'}</div>
+                                  <div className="text-sm text-slate-500 mt-1 flex items-center gap-1">
+                                    <Mail className="h-3 w-3" />
+                                    {user.email}
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden lg:table-cell py-4">
+                              <div className="text-slate-700 font-medium">
+                                {user.department || <span className="text-slate-400 italic">Not assigned</span>}
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell py-4">
+                              <div className="text-slate-600">
+                                {user.position || <span className="text-slate-400 italic">Not specified</span>}
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-4">
+                              <Badge className={`px-3 py-1.5 text-sm font-semibold border ${
+                                user.role === 'admin' 
+                                  ? 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-100 shadow-sm' 
+                                  : 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100 shadow-sm'
+                              }`}>
+                                {user.role === 'admin' ? (
+                                  <Crown className="h-3.5 w-3.5 mr-1.5" />
+                                ) : (
+                                  <UserCheck className="h-3.5 w-3.5 mr-1.5" />
+                                )}
+                                {user.role.toUpperCase()}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="py-4">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditUser(user)}
+                                  className="h-9 w-9 p-0 bg-white/80 border-slate-200 hover:bg-white hover:border-slate-300 shadow-sm"
+                                >
+                                  <Settings className="h-4 w-4" />
+                                  <span className="sr-only">Edit</span>
+                                </Button>
+                                <Button
+                                  variant={user.role === 'admin' ? 'outline' : 'default'}
+                                  size="sm"
+                                  onClick={() => toggleRole(user)}
+                                  className={`h-9 font-semibold ${
+                                    user.role === 'admin' 
+                                      ? 'border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800' 
+                                      : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl'
+                                  }`}
+                                >
+                                  {user.role === 'admin' ? 'Revoke Admin' : 'Grant Admin'}
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="h-32 text-center">
+                            {searchQuery || roleFilter !== "all" ? (
+                              <div className="flex flex-col items-center gap-3 text-slate-500">
+                                <Search className="h-12 w-12 opacity-40" />
+                                <p className="text-lg">No users match your search criteria</p>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => {
+                                    setSearchQuery("");
+                                    setRoleFilter("all");
+                                  }}
+                                  className="mt-2"
+                                >
+                                  Clear Filters
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center gap-3 text-slate-500">
+                                <Users className="h-12 w-12 opacity-40" />
+                                <p className="text-lg">No users found in the system</p>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                <div className="px-6 py-4 border-t border-slate-200/50 bg-slate-50/50">
+                  <div className="text-sm text-slate-600 font-medium">
+                    Displaying <span className="font-bold text-slate-800">{filteredUsers.length}</span> of{' '}
+                    <span className="font-bold text-slate-800">{users.length}</span> users
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
+
+        {/* Enhanced Edit Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl border-white/30">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <UserCog className="h-5 w-5 text-indigo-600" />
+                Edit User Profile
+              </DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Update user information and organizational details
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="flex items-center justify-center mb-4">
+                <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
+                  <AvatarImage src={editingUser?.photoURL || ''} alt={editingUser?.displayName} />
+                  <AvatarFallback className={`text-lg font-bold ${
+                    editingUser?.role === 'admin' 
+                      ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white' 
+                      : 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white'
+                  }`}>
+                    {getInitials(editingUser?.displayName || 'U')}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="name" className="text-sm font-semibold text-slate-700">Display Name</label>
+                <Input
+                  id="name"
+                  value={editingUser?.displayName || ''}
+                  onChange={(e) => setEditingUser(prev => 
+                    prev ? {...prev, displayName: e.target.value} : null
+                  )}
+                  className="bg-white/80 border-slate-200 focus:border-indigo-300"
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="email" className="text-sm font-semibold text-slate-700">Email Address</label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={editingUser?.email || ''}
+                  onChange={(e) => setEditingUser(prev => 
+                    prev ? {...prev, email: e.target.value} : null
+                  )}
+                  className="bg-white/80 border-slate-200 focus:border-indigo-300"
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="department" className="text-sm font-semibold text-slate-700">Department</label>
+                <Input
+                  id="department"
+                  value={editingUser?.department || ''}
+                  onChange={(e) => setEditingUser(prev => 
+                    prev ? {...prev, department: e.target.value} : null
+                  )}
+                  className="bg-white/80 border-slate-200 focus:border-indigo-300"
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="position" className="text-sm font-semibold text-slate-700">Position</label>
+                <Input
+                  id="position"
+                  value={editingUser?.position || ''}
+                  onChange={(e) => setEditingUser(prev => 
+                    prev ? {...prev, position: e.target.value} : null
+                  )}
+                  className="bg-white/80 border-slate-200 focus:border-indigo-300"
+                />
+              </div>
+            </div>
+            <DialogFooter>
               <Button 
                 variant="outline" 
-                size="sm" 
-                onClick={refreshData} 
-                className="mt-2"
+                onClick={() => setIsDialogOpen(false)}
+                className="border-slate-300 text-slate-700 hover:bg-slate-50"
               >
-                Try Again
+                Cancel
               </Button>
-            </div>
-          )}
-
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search users by name, email, or department..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full md:w-auto">
-                  <Filter className="h-4 w-4 mr-2" />
-                  {roleFilter === "all" 
-                    ? "All Roles" 
-                    : roleFilter === "admin" 
-                      ? "Admins Only" 
-                      : "Users Only"}
-                  <ChevronDown className="h-4 w-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setRoleFilter("all")}>
-                  <Users className="h-4 w-4 mr-2" />
-                  All Roles
-                  {roleFilter === "all" && <CheckCircle2 className="h-4 w-4 ml-2" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRoleFilter("admin")}>
-                  <ShieldAlert className="h-4 w-4 mr-2" />
-                  Admins Only
-                  {roleFilter === "admin" && <CheckCircle2 className="h-4 w-4 ml-2" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRoleFilter("user")}>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Users Only
-                  {roleFilter === "user" && <CheckCircle2 className="h-4 w-4 ml-2" />}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow>
-                  <TableHead className="w-[250px]">User</TableHead>
-                  <TableHead className="hidden md:table-cell">Department</TableHead>
-                  <TableHead className="hidden md:table-cell">Position</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
-                    <TableRow key={user.uid} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.photoURL || ''} alt={user.displayName} />
-                            <AvatarFallback className={user.role === 'admin' ? 'bg-purple-100' : 'bg-blue-100'}>
-                              {user.displayName?.charAt(0).toUpperCase() || '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{user.displayName || 'Unnamed User'}</div>
-                            <div className="text-xs text-muted-foreground">{user.email}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {user.department || <span className="text-muted-foreground">Not set</span>}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {user.position || <span className="text-muted-foreground">Not set</span>}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="capitalize">
-                          {user.role === 'admin' ? (
-                            <ShieldAlert className="h-3 w-3 mr-1" />
-                          ) : (
-                            <Shield className="h-3 w-3 mr-1" />
-                          )}
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditUser(user)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button
-                            variant={user.role === 'admin' ? 'destructive' : 'default'}
-                            size="sm"
-                            onClick={() => toggleRole(user)}
-                            className="h-8"
-                          >
-                            {user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                      {searchQuery || roleFilter !== "all" ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <p className="text-muted-foreground">No users match your search criteria</p>
-                          <Button variant="outline" size="sm" onClick={() => {
-                            setSearchQuery("");
-                            setRoleFilter("all");
-                          }}>
-                            Clear Filters
-                          </Button>
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground">No users found</p>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          
-          <div className="mt-4 text-sm text-muted-foreground">
-            Showing {filteredUsers.length} of {users.length} users
-          </div>
-        </CardContent>
-      </Card>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit User Profile</DialogTitle>
-            <DialogDescription>
-              Update user information and details
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="flex items-center justify-center mb-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={editingUser?.photoURL || ''} alt={editingUser?.displayName} />
-                <AvatarFallback className={editingUser?.role === 'admin' ? 'bg-purple-100 text-lg' : 'bg-blue-100 text-lg'}>
-                  {editingUser?.displayName?.charAt(0).toUpperCase() || '?'}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="name" className="text-sm font-medium">Display Name</label>
-              <Input
-                id="name"
-                value={editingUser?.displayName || ''}
-                onChange={(e) => setEditingUser(prev => 
-                  prev ? {...prev, displayName: e.target.value} : null
-                )}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="email" className="text-sm font-medium">Email Address</label>
-              <Input
-                id="email"
-                type="email"
-                value={editingUser?.email || ''}
-                onChange={(e) => setEditingUser(prev => 
-                  prev ? {...prev, email: e.target.value} : null
-                )}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="department" className="text-sm font-medium">Department</label>
-              <Input
-                id="department"
-                value={editingUser?.department || ''}
-                onChange={(e) => setEditingUser(prev => 
-                  prev ? {...prev, department: e.target.value} : null
-                )}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="position" className="text-sm font-medium">Position</label>
-              <Input
-                id="position"
-                value={editingUser?.position || ''}
-                onChange={(e) => setEditingUser(prev => 
-                  prev ? {...prev, position: e.target.value} : null
-                )}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveUser}>
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <Button 
+                onClick={handleSaveUser}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

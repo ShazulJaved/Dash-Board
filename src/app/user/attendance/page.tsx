@@ -37,7 +37,7 @@ interface AttendanceData {
   presentDays: number;
   lateDays: number;
   recentActivities: AttendanceRecord[];
-  currentAttendanceId: string | null;
+  currentAttendanceId: string | null; 
 }
 
 export default function AttendancePage() {
@@ -56,6 +56,8 @@ export default function AttendancePage() {
     recentActivities: [],
     currentAttendanceId: null,
   });
+  
+  
   const { toast } = useToast();
 
   // Protect the route
@@ -101,9 +103,11 @@ export default function AttendancePage() {
       });
     } finally {
       setLoading(false);
+      return
     }
+    
   };
-
+  
   useEffect(() => {
     fetchData();
 
@@ -272,20 +276,20 @@ export default function AttendancePage() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <div className="flex-1 overflow-auto">
+      <div className="absolute top-0 right-0 h-[30%] bg-gradient-to-b from-teal-900/60 to-emerald-800/40">
         <div className="p-8 space-y-6">
           {/* Header */}
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Attendance Management</h1>
+            <h1 className="text-3xl font-bold text-white bg-clip-text">Attendance Management</h1>
             <div className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-gray-500" />
+              <Clock className="h-5 w-5 text-white" />
               <span className="font-medium">
                 {currentTime.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
               </span>
-              <span className="text-gray-500">
+              <span className="text-white">
                 {currentTime.toLocaleDateString([], {
                   weekday: "long",
                   month: "long",
@@ -299,10 +303,10 @@ export default function AttendancePage() {
             {/* Today's Status Card */}
             <Card className="border-blue-100">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-teal-900 bg-clip-text">
                   Today's Status
                 </CardTitle>
-                <UserCheck className="h-4 w-4 text-blue-500" />
+                <UserCheck className="h-4 w-4 text-teal-900" />
               </CardHeader>
               <CardContent>
   <div className="text-2xl font-bold mb-2">
@@ -348,7 +352,7 @@ export default function AttendancePage() {
       </Button>
     ) : (
       <Button
-        className="w-full bg-blue-600 hover:bg-blue-700"
+        className="w-full bg-blue-600 hover:bg-teal-500"
         onClick={handleCheckIn}
         disabled={loading}
       >
@@ -363,7 +367,7 @@ export default function AttendancePage() {
             {/* Monthly Attendance Card */}
             <Card className="border-green-100">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-teal-900">
                   Monthly Attendance
                 </CardTitle>
                 <CalendarCheck className="h-4 w-4 text-green-500" />
@@ -407,7 +411,7 @@ export default function AttendancePage() {
             {/* Recent Activities Card */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
+                <CardTitle className="flex items-center text-teal-900">
                   <AlertCircle className="h-5 w-5 mr-2 text-orange-500" />
                   Recent Activities
                 </CardTitle>
@@ -448,7 +452,7 @@ export default function AttendancePage() {
                     </div>
                   ))}
                 </div>
-                <Button variant="ghost" className="w-full mt-4 text-blue-600">
+                <Button variant="ghost" className="w-full mt-4 text-teal-900">
                   View Full History
                 </Button>
               </CardContent>
