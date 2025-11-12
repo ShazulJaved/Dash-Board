@@ -1,7 +1,8 @@
-// functions/src/index.ts
 import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 
-// Add a simple function to make the deployment work
+admin.initializeApp();
+
 export const helloWorld = functions.https.onRequest((request, response) => {
   response.send("Hello from Firebase!");
 });
