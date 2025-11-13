@@ -88,6 +88,8 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
     "autoprefixer": "^10.4.16",
     "cross-env": "^7.0.3",
     "dotenv": "^16.5.0",
